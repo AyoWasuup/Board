@@ -1,6 +1,7 @@
 use bevy::{input::mouse::MouseMotion, prelude::*};
 #[path = "global.rs"]
 mod global;
+
 use global::*;
 
 const SPEED: f32 = 25.0;
@@ -57,7 +58,6 @@ macro_rules! summon_player {
                     ..default()
                 },
                 Player,
-                Scroll,
             ))
             .insert(Collider::cuboid(
                 PLAYER_SCALE.x,

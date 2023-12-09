@@ -20,8 +20,3 @@ impl Ground {
         }
     }
 }
-
-pub const DEFAULT_SCROLL_SPEED: f32 = 1.0;
-
-#[derive(Component)]
-pub struct Scroll;
