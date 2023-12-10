@@ -31,31 +31,27 @@ fn main() {
         .run();
 }
 
-fn setup(mut commands: Commands) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     summon_player!(commands, Vec3::new(0.0, 30.0, 0.0));
+    make_flooritem_base!(commands);
 
     commands
         .spawn((
             SpriteBundle {
                 transform: Transform {
                     translation: Vec3::new(0.0, 0.0, -1.0),
-                    scale: Vec3::new(GROUND_WIDTH, 400.0, 0.0),
+                    scale: Vec3::new(5.0, 5.0, 1.0),
                     ..default()
                 },
-                sprite: Sprite {
-                    color: Color::WHITE,
-                    ..default()
-                },
+                texture: asset_server.load("snow.png"),
                 ..default()
             },
             Ground::new(50.0),
         ))
         .insert(Collider::cuboid(GROUND_WIDTH, 400.0, 0.0));
-
-    make_flooritem_base!(commands);
 }
 
-const MAX_Y_POS_GROUND: f32 = 100.0;
+const MAX_Y_POS_GROUND: f32 = 80.0;
 
 fn scroll_ground(mut ground_query: Query<(&mut Ground, &mut Transform)>, time: Res<Time>) {
     let (mut ground, mut transform) = ground_query.single_mut();
@@ -74,5 +70,6 @@ fn scroll_items(
 ) {
     for (mut flooritem, mut transform) in &mut scroll_query {
         transform.translation.y += ground.single().scroll_speed * time.delta_seconds();
+        println!("flooritem: {}", transform.translation);
     }
 }

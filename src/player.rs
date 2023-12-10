@@ -28,15 +28,14 @@ pub fn move_player(
         transform.translation.x += (movedx * SPEED) * time.delta_seconds();
         // both of the ground's and player's widths are halfed because in bevy the position is in the centre of
         // the renderd object
-        let clamped_transform = transform.translation.x.clamp(
-            -GROUND_WIDTH / 2.0 + (PLAYER_SCALE.x / 2.0),
-            GROUND_WIDTH / 2.0 - (PLAYER_SCALE.x / 2.0),
-        );
+        let clamped_transform = transform.translation.x.clamp(-400.0, 400.0);
         transform.translation.x = clamped_transform;
 
         transform.rotate_z(rotate * time.delta_seconds());
         let clamped_rotation = transform.rotation.z.clamp(-25.5, 90.0);
         transform.rotation = Quat::from_rotation_z(clamped_rotation);
+
+        println!("Player: {}", transform.translation);
     }
 }
 

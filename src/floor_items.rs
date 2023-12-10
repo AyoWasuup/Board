@@ -29,8 +29,8 @@ macro_rules! make_flooritem_base {
         $commands.spawn((
             SpriteBundle {
                 transform: Transform {
-                    translation: Vec3::new(xpos, -400.0, 0.0),
-                    scale: Vec3::new(30.0, 30.0, 30.0),
+                    translation: Vec3::new(xpos, -400.0, 1.0),
+                    scale: Vec3::new(30.0, 30.0, 1.0),
                     ..default()
                 },
                 sprite: Sprite {
