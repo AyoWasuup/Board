@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use rand::Rng;
 
 #[path = "global.rs"]
 mod global;
@@ -22,11 +23,13 @@ impl FloorItem {
 
 #[macro_export]
 macro_rules! make_flooritem_base {
-    ($commands:ident, $vec:expr, $scroll:expr) => {
+    ($commands:ident) => {
+        let mut rng = rand::thread_rng();
+        let xpos: f32 = rng.gen_range(-400.0..400.0);
         $commands.spawn((
             SpriteBundle {
                 transform: Transform {
-                    translation: $vec,
+                    translation: Vec3::new(xpos, -400.0, 0.0),
                     scale: Vec3::new(30.0, 30.0, 30.0),
                     ..default()
                 },

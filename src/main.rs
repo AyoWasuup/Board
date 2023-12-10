@@ -13,6 +13,8 @@ use floor_items::*;
 
 mod window_cam;
 
+use rand::Rng;
+
 const DEFAULT_SCROLL_SPEED: f32 = 1.0;
 
 fn main() {
@@ -50,7 +52,7 @@ fn setup(mut commands: Commands) {
         ))
         .insert(Collider::cuboid(GROUND_WIDTH, 400.0, 0.0));
 
-    make_flooritem_base!(commands, Vec3::new(0.0, 0.0, 0.0), Scroll);
+    make_flooritem_base!(commands);
 }
 
 const MAX_Y_POS_GROUND: f32 = 100.0;
