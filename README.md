@@ -1,8 +1,6 @@
 # Board? (pre-alpha)
 wip rust game
-#
-#
-#
+<br>
 # Install guide
 1. Install rust
 2. Compile the game files
