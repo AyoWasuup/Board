@@ -1,4 +1,4 @@
-use bevy::{input::mouse::MouseMotion, prelude::*};
+use bevy::{input::mouse::MouseMotion, prelude::*, render::render_resource::PipelineLayout};
 #[path = "global.rs"]
 mod global;
 
@@ -8,7 +8,15 @@ const SPEED: f32 = 25.0;
 pub const PLAYER_SCALE: Vec3 = Vec3::new(25.0, 50.0, 0.0);
 
 #[derive(Component)]
-pub struct Player;
+pub struct Player {
+    midair: bool,
+}
+
+impl Player {
+    pub fn new() -> Player {
+        Player { midair: false }
+    }
+}
 
 pub fn move_player(
     mut query: Query<(&mut Player, &mut Transform)>,
@@ -28,14 +36,16 @@ pub fn move_player(
         transform.translation.x += (movedx * SPEED) * time.delta_seconds();
         // both of the ground's and player's widths are halfed because in bevy the position is in the centre of
         // the renderd object
-        let clamped_transform = transform.translation.x.clamp(-400.0, 400.0);
+        let clamped_transform = transform.translation.x.clamp(
+            -400.0 + (PLAYER_SCALE.x / 2.0),
+            400.0 - (PLAYER_SCALE.x / 2.0),
+        );
+
         transform.translation.x = clamped_transform;
 
         transform.rotate_z(rotate * time.delta_seconds());
         let clamped_rotation = transform.rotation.z.clamp(-25.5, 90.0);
         transform.rotation = Quat::from_rotation_z(clamped_rotation);
-
-        println!("Player: {}", transform.translation);
     }
 }
 
@@ -56,7 +66,7 @@ macro_rules! summon_player {
                     },
                     ..default()
                 },
-                Player,
+                Player::new(),
             ))
             .insert(Collider::cuboid(
                 PLAYER_SCALE.x,

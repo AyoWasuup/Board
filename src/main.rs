@@ -23,8 +23,11 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(setup_win))
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
+        // startup
         .add_systems(Startup, window_cam::make_camera)
         .add_systems(Startup, setup)
+        .add_systems(Startup, fix_colliders)
+        // fixedupdate
         .add_systems(FixedUpdate, move_player)
         .add_systems(FixedUpdate, scroll_ground)
         .add_systems(FixedUpdate, scroll_items)
@@ -33,7 +36,7 @@ fn main() {
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     summon_player!(commands, Vec3::new(0.0, 30.0, 0.0));
-    make_flooritem_base!(commands);
+    make_ramp!(commands);
 
     commands
         .spawn((
@@ -49,6 +52,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             Ground::new(50.0),
         ))
         .insert(Collider::cuboid(GROUND_WIDTH, 400.0, 0.0));
+}
+
+fn fix_colliders(mut commands: Commands, entities: Query<Entity, With<Collider>>) {
+    for entity in entities.iter() {
+        // Add the Sensor component to make it a sensor collider.
+        commands.entity(entity).insert(Sensor);
+    }
 }
 
 const MAX_Y_POS_GROUND: f32 = 80.0;
@@ -70,6 +80,5 @@ fn scroll_items(
 ) {
     for (mut flooritem, mut transform) in &mut scroll_query {
         transform.translation.y += ground.single().scroll_speed * time.delta_seconds();
-        println!("flooritem: {}", transform.translation);
     }
 }
