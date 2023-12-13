@@ -26,7 +26,6 @@ fn main() {
         // startup
         .add_systems(Startup, window_cam::make_camera)
         .add_systems(Startup, setup)
-        .add_systems(Startup, fix_colliders)
         // fixedupdate
         .add_systems(FixedUpdate, move_player)
         .add_systems(FixedUpdate, scroll_ground)
@@ -38,27 +37,18 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     summon_player!(commands, Vec3::new(0.0, 30.0, 0.0));
     make_ramp!(commands);
 
-    commands
-        .spawn((
-            SpriteBundle {
-                transform: Transform {
-                    translation: Vec3::new(0.0, 0.0, -1.0),
-                    scale: Vec3::new(5.0, 5.0, 1.0),
-                    ..default()
-                },
-                texture: asset_server.load("snow.png"),
+    commands.spawn((
+        SpriteBundle {
+            transform: Transform {
+                translation: Vec3::new(0.0, 0.0, -1.0),
+                scale: Vec3::new(5.0, 5.0, 1.0),
                 ..default()
             },
-            Ground::new(50.0),
-        ))
-        .insert(Collider::cuboid(GROUND_WIDTH, 400.0, 0.0));
-}
-
-fn fix_colliders(mut commands: Commands, entities: Query<Entity, With<Collider>>) {
-    for entity in entities.iter() {
-        // Add the Sensor component to make it a sensor collider.
-        commands.entity(entity).insert(Sensor);
-    }
+            texture: asset_server.load("snow.png"),
+            ..default()
+        },
+        Ground::new(50.0),
+    ));
 }
 
 const MAX_Y_POS_GROUND: f32 = 80.0;

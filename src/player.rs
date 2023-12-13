@@ -36,10 +36,7 @@ pub fn move_player(
         transform.translation.x += (movedx * SPEED) * time.delta_seconds();
         // both of the ground's and player's widths are halfed because in bevy the position is in the centre of
         // the renderd object
-        let clamped_transform = transform.translation.x.clamp(
-            -400.0 + (PLAYER_SCALE.x / 2.0),
-            400.0 - (PLAYER_SCALE.x / 2.0),
-        );
+        let clamped_transform = transform.translation.x.clamp(-200.0, 200.0);
 
         transform.translation.x = clamped_transform;
 
@@ -68,10 +65,15 @@ macro_rules! summon_player {
                 },
                 Player::new(),
             ))
-            .insert(Collider::cuboid(
-                PLAYER_SCALE.x,
-                PLAYER_SCALE.y,
-                PLAYER_SCALE.z,
-            ));
+            .with_children(|children| {
+                children
+                    .spawn(Collider::cuboid(
+                        PLAYER_SCALE.x,
+                        PLAYER_SCALE.y,
+                        PLAYER_SCALE.z,
+                    ))
+                    .insert(Sensor)
+                    .insert(ActiveEvents::COLLISION_EVENTS);
+            });
     };
 }
