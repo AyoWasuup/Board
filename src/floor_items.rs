@@ -45,8 +45,7 @@ macro_rules! make_flooritem_base {
             .with_children(|children| {
                 children
                     .spawn(Collider::cuboid(30.0, 30.0, 1.0))
-                    .insert(Sensor)
-                    .insert(ActiveEvents::COLLISION_EVENTS);
+                    .insert(Sensor);
             });
     };
 }
@@ -75,8 +74,7 @@ macro_rules! make_ramp {
             .with_children(|children| {
                 children
                     .spawn(Collider::cuboid(30.0, 30.0, 1.0))
-                    .insert(Sensor)
-                    .insert(ActiveEvents::COLLISION_EVENTS);
+                    .insert(Sensor);
             });
     };
 }

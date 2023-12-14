@@ -72,8 +72,7 @@ macro_rules! summon_player {
                         PLAYER_SCALE.y,
                         PLAYER_SCALE.z,
                     ))
-                    .insert(Sensor)
-                    .insert(ActiveEvents::COLLISION_EVENTS);
+                    .insert(Sensor);
             });
     };
 }

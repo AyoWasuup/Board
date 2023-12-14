@@ -1,8 +1,10 @@
+use bevy::ecs::event::event_update_condition;
 use bevy::prelude::*;
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_rapier3d::prelude::*;
 
 mod global;
+use bevy_rapier3d::rapier::prelude::ActiveEvents;
 use global::*;
 
 mod player;
@@ -30,6 +32,7 @@ fn main() {
         .add_systems(FixedUpdate, move_player)
         .add_systems(FixedUpdate, scroll_ground)
         .add_systems(FixedUpdate, scroll_items)
+        .add_systems(FixedUpdate, collide)
         .run();
 }
 
@@ -70,5 +73,11 @@ fn scroll_items(
 ) {
     for (mut flooritem, mut transform) in &mut scroll_query {
         transform.translation.y += ground.single().scroll_speed * time.delta_seconds();
+    }
+}
+
+fn collide(mut collision_events: EventReader<CollisionEvent>) {
+    for mut event in &mut collision_events.read() {
+        println!("COLLIDED");
     }
 }
