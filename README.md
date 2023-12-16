@@ -11,5 +11,5 @@ If you are testing the game on Windows then it might compile differently or take
 It can take up to 10 minutes to compile for the first time, I have compile options to make all compiles APART FROM the first way better, after the wait compiling will be very quick.
 If you want it to be faster the first time:
 1. Run **cargo clean**
-2. 2. Rename UNO.toml to Cargo.toml.
+2. Rename UNO.toml to Cargo.toml.
 Regardless don't expect the first compile to be fast, you are compiling a game engine from scratch.
