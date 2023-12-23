@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use bevy::{core_pipeline::core_3d::graph::node::DEFERRED_PREPASS, prelude::*};
 
 pub const BACKGROUND_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);

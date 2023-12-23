@@ -9,7 +9,7 @@ pub const PLAYER_SCALE: Vec3 = Vec3::new(25.0, 50.0, 0.0);
 
 #[derive(Component)]
 pub struct Player {
-    midair: bool,
+    pub midair: bool,
 }
 
 impl Player {
@@ -27,7 +27,7 @@ pub fn move_player(
         let mut movedx = 0.0;
         let mut rotate = 0.0;
 
-        for ev in mouse_motion.iter() {
+        for ev in mouse_motion.read() {
             // println!("Mouse moved x: {} y: {}", ev.delta.x, ev.delta.y);
             movedx = ev.delta.x;
             rotate = ev.delta.x;
@@ -66,13 +66,13 @@ macro_rules! summon_player {
                 Player::new(),
             ))
             .with_children(|children| {
-                children
-                    .spawn(Collider::cuboid(
-                        PLAYER_SCALE.x,
-                        PLAYER_SCALE.y,
-                        PLAYER_SCALE.z,
-                    ))
-                    .insert(Sensor);
+                //children
+                //    //.spawn(Collider::cuboid(
+                //        PLAYER_SCALE.x,
+                //        PLAYER_SCALE.y,
+                //        PLAYER_SCALE.z,
+                //    ))
+                //    .insert(Sensor);
             });
     };
 }

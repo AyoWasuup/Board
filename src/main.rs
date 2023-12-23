@@ -1,11 +1,8 @@
 use bevy::ecs::event::event_update_condition;
 use bevy::prelude::*;
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
-use bevy_rapier3d::prelude::*;
 
 mod global;
-use bevy_rapier3d::rapier::prelude::ActiveEvents;
-use global::*;
 
 mod player;
 use player::*;
@@ -24,7 +21,6 @@ fn main() {
 
     App::new()
         .add_plugins(DefaultPlugins.set(setup_win))
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         // startup
         .add_systems(Startup, window_cam::make_camera)
         .add_systems(Startup, setup)
@@ -50,13 +46,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             texture: asset_server.load("snow.png"),
             ..default()
         },
-        Ground::new(50.0),
+        global::Ground::new(50.0),
     ));
 }
 
 const MAX_Y_POS_GROUND: f32 = 80.0;
 
-fn scroll_ground(mut ground_query: Query<(&mut Ground, &mut Transform)>, time: Res<Time>) {
+fn scroll_ground(mut ground_query: Query<(&mut global::Ground, &mut Transform)>, time: Res<Time>) {
     let (mut ground, mut transform) = ground_query.single_mut();
 
     if MAX_Y_POS_GROUND > transform.translation.y {
@@ -68,7 +64,7 @@ fn scroll_ground(mut ground_query: Query<(&mut Ground, &mut Transform)>, time: R
 
 fn scroll_items(
     mut scroll_query: Query<(&mut FloorItem, &mut Transform)>,
-    ground: Query<&Ground>,
+    ground: Query<&global::Ground>,
     time: Res<Time>,
 ) {
     for (mut flooritem, mut transform) in &mut scroll_query {
@@ -76,8 +72,33 @@ fn scroll_items(
     }
 }
 
-fn collide(mut collision_events: EventReader<CollisionEvent>) {
-    for mut event in &mut collision_events.read() {
-        println!("COLLIDED");
+fn collide(
+    mut commands: Commands,
+    mut player_query: Query<(&mut Player, &Transform)>,
+    mut entity_query: Query<(Entity, &Transform, Option<&FloorItem>)>,
+) {
+    let (mut player, player_transform) = player_query.single_mut();
+    let player_size = player_transform.scale.truncate();
+
+    for (entity, transform, maybe_flooritem) in &mut entity_query {
+        let collision = bevy::sprite::collide_aabb::collide(
+            player_transform.translation,
+            player_size,
+            transform.translation,
+            transform.scale.truncate(),
+        );
+
+        if let Some(collision) = collision {
+            if maybe_flooritem.is_some() {
+                let flooritem = maybe_flooritem.unwrap();
+
+                match flooritem.get_type() {
+                    "ramp" => player.midair = true,
+                    _ => (),
+                }
+
+                commands.entity(entity).despawn();
+            }
+        }
     }
 }
