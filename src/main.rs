@@ -25,15 +25,26 @@ fn main() {
         .add_systems(Startup, window_cam::make_camera)
         .add_systems(Startup, setup)
         // fixedupdate
-        .add_systems(FixedUpdate, move_player)
-        .add_systems(FixedUpdate, scroll_ground)
-        .add_systems(FixedUpdate, scroll_items)
-        .add_systems(FixedUpdate, collide)
+        //.add_systems(FixedUpdate, move_player)
+        //.add_systems(FixedUpdate, scroll_ground)
+        //.add_systems(FixedUpdate, scroll_items)
+        //.add_systems(FixedUpdate, collide)
+        .add_systems(
+            FixedUpdate,
+            (
+                move_player,
+                scroll_ground,
+                scroll_items,
+                collide,
+                midair_player,
+            )
+                .chain(),
+        )
         .run();
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    summon_player!(commands, Vec3::new(0.0, 30.0, 0.0));
+    summon_player!(commands);
     make_ramp!(commands);
 
     commands.spawn((
@@ -46,7 +57,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             texture: asset_server.load("snow.png"),
             ..default()
         },
-        global::Ground::new(50.0),
+        global::Ground::new(200.0),
     ));
 }
 
@@ -93,11 +104,16 @@ fn collide(
                 let flooritem = maybe_flooritem.unwrap();
 
                 match flooritem.get_type() {
-                    "ramp" => player.midair = true,
+                    "ramp" => {
+                        if !player.midair {
+                            player.midair = true;
+                        }
+                    }
                     _ => (),
                 }
 
-                commands.entity(entity).despawn();
+                // despawns the pickup
+                //commands.entity(entity).despawn();
             }
         }
     }

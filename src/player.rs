@@ -1,4 +1,5 @@
 use bevy::{input::mouse::MouseMotion, prelude::*, render::render_resource::PipelineLayout};
+use std::time::Duration;
 #[path = "global.rs"]
 mod global;
 
@@ -6,15 +7,26 @@ use global::*;
 
 const SPEED: f32 = 25.0;
 pub const PLAYER_SCALE: Vec3 = Vec3::new(25.0, 50.0, 0.0);
+pub const PLAYER_DEFAULT_POS: Vec3 = Vec3::new(0.0, 30.0, 0.0);
 
 #[derive(Component)]
 pub struct Player {
     pub midair: bool,
+    pub midair_time: (usize, usize),
 }
 
 impl Player {
     pub fn new() -> Player {
-        Player { midair: false }
+        Player {
+            midair: false,
+            midair_time: (0, 5),
+        }
+    }
+
+    pub fn hit_by_ramp(&mut self) {
+        if !self.midair {
+            self.midair;
+        }
     }
 }
 
@@ -46,14 +58,41 @@ pub fn move_player(
     }
 }
 
+#[derive(Component)]
+pub struct MidairTimer {
+    pub time: Timer,
+}
+
+pub fn midair_player(
+    time: Res<Time>,
+    mut player_query: Query<(&mut Player, &mut Transform, &mut MidairTimer)>,
+) {
+    let (mut player, mut player_transform, mut midair_timer) = player_query.single_mut();
+
+    if player.midair {
+        if player_transform.translation.y == PLAYER_DEFAULT_POS.y {
+            player_transform.translation.y += 50.0;
+            player_transform.translation.z += 2.0;
+        }
+
+        midair_timer.time.tick(time.delta());
+
+        if midair_timer.time.just_finished() {
+            player_transform.translation.y -= 50.0;
+            player_transform.translation.z -= 2.0;
+            player.midair = false;
+        }
+    }
+}
+
 #[macro_export]
 macro_rules! summon_player {
-    ($commands:ident, $vec:expr) => {
+    ($commands:ident) => {
         $commands
             .spawn((
                 SpriteBundle {
                     transform: Transform {
-                        translation: $vec,
+                        translation: PLAYER_DEFAULT_POS,
                         scale: PLAYER_SCALE,
                         ..default()
                     },
@@ -64,6 +103,9 @@ macro_rules! summon_player {
                     ..default()
                 },
                 Player::new(),
+                MidairTimer {
+                    time: Timer::from_seconds(2.0, TimerMode::Once),
+                },
             ))
             .with_children(|children| {
                 //children
