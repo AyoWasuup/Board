@@ -61,6 +61,7 @@ pub fn move_player(
 #[derive(Component)]
 pub struct MidairTimer {
     pub time: Timer,
+    pub repeated: i32,
 }
 
 pub fn midair_player(
@@ -69,18 +70,31 @@ pub fn midair_player(
 ) {
     let (mut player, mut player_transform, mut midair_timer) = player_query.single_mut();
 
+    let jumptime_y = 4.0;
+    let jumptime_z = 0.5;
+
     if player.midair {
         if player_transform.translation.y == PLAYER_DEFAULT_POS.y {
-            player_transform.translation.y += 50.0;
-            player_transform.translation.z += 2.0;
+            //player_transform.translation.y += jumptime_y;
+            player_transform.translation.z += jumptime_z;
         }
 
         midair_timer.time.tick(time.delta());
 
         if midair_timer.time.just_finished() {
-            player_transform.translation.y -= 50.0;
-            player_transform.translation.z -= 2.0;
-            player.midair = false;
+            midair_timer.repeated += 1;
+
+            if midair_timer.repeated == 24 {
+                //player_transform.translation.y -= jumptime_y;
+                player_transform.translation.z -= jumptime_z;
+                player.midair = false;
+            } else if midair_timer.repeated > 12 {
+                //player_transform.translation.y -= jumptime_y;
+                player_transform.translation.z -= jumptime_z;
+            } else {
+                //player_transform.translation.y += jumptime_y;
+                player_transform.translation.z += jumptime_z;
+            }
         }
     }
 }
@@ -104,7 +118,8 @@ macro_rules! summon_player {
                 },
                 Player::new(),
                 MidairTimer {
-                    time: Timer::from_seconds(2.0, TimerMode::Once),
+                    time: Timer::from_seconds(1.2, TimerMode::Repeating),
+                    repeated: 0,
                 },
             ))
             .with_children(|children| {
