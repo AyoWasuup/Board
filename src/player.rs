@@ -7,7 +7,14 @@ use global::*;
 
 const SPEED: f32 = 25.0;
 pub const PLAYER_SCALE: Vec3 = Vec3::new(25.0, 50.0, 0.0);
-pub const PLAYER_DEFAULT_POS: Vec3 = Vec3::new(0.0, 30.0, 0.0);
+pub const PLAYER_DEFAULT_POS: Vec3 = Vec3::new(0.0, 200.0, 0.0);
+
+#[derive(Component)]
+pub struct PlayAnimation {
+    pub first: usize,
+    pub last: usize,
+    pub current: usize,
+}
 
 #[derive(Component)]
 pub struct Player {
@@ -34,17 +41,27 @@ impl Player {
 
 pub fn move_player(
     mut query: Query<(&mut Player, &mut Transform)>,
+    mut player_anim: Query<&mut PlayAnimation, With<Player>>,
     mut mouse_motion: EventReader<MouseMotion>,
     time: Res<Time>,
 ) {
+    let mut player_sprite = player_anim.single_mut();
+
     for (mut player, mut transform) in &mut query {
         let mut movedx = 0.0;
         let mut rotate = 0.0;
 
         for ev in mouse_motion.read() {
-            // println!("Mouse moved x: {} y: {}", ev.delta.x, ev.delta.y);
             movedx = ev.delta.x;
             rotate = ev.delta.x;
+        }
+
+        if rotate > 1.0 {
+            player_sprite.current = 1;
+        } else if rotate < -1.0 {
+            player_sprite.current = 2;
+        } else {
+            player_sprite.current = 0;
         }
 
         transform.translation.x += (movedx * SPEED) * time.delta_seconds();
@@ -57,6 +74,14 @@ pub fn move_player(
         transform.rotate_z(rotate * time.delta_seconds());
         let clamped_rotation = transform.rotation.z.clamp(-25.5, 90.0);
         transform.rotation = Quat::from_rotation_z(clamped_rotation);
+    }
+}
+
+pub fn animate_player(
+    mut query: Query<(&mut PlayAnimation, &mut TextureAtlasSprite), With<Player>>,
+) {
+    for (mut player, mut player_sprite) in &mut query {
+        player_sprite.index = player.current;
     }
 }
 
@@ -92,46 +117,38 @@ pub fn midair_player(
             player_transform.translation.y += jumptime_y;
             player_transform.translation.z += jumptime_z;
         }
-
-        println!(
-            "finished: {}, ypos: {}",
-            midair_timer.time.finished(),
-            player_transform.translation.y
-        );
     }
 }
 
 #[macro_export]
 macro_rules! summon_player {
-    ($commands:ident) => {
-        $commands
-            .spawn((
-                SpriteBundle {
-                    transform: Transform {
-                        translation: PLAYER_DEFAULT_POS,
-                        scale: PLAYER_SCALE,
-                        ..default()
-                    },
-                    sprite: Sprite {
-                        color: Color::BLUE,
-                        ..default()
-                    },
+    ($commands:ident, $asset_server:ident, $texture_atlases:ident) => {
+        let texture_handle = $asset_server.load("player.png");
+        let texture_atlas =
+            TextureAtlas::from_grid(texture_handle, Vec2::new(32.0, 32.0), 7, 1, None, None);
+        let texture_atlas_handle = $texture_atlases.add(texture_atlas);
+
+        $commands.spawn((
+            SpriteSheetBundle {
+                texture_atlas: texture_atlas_handle,
+                sprite: TextureAtlasSprite::new(0),
+                transform: Transform {
+                    translation: PLAYER_DEFAULT_POS,
+                    scale: Vec3::new(2.0, 2.0, 1.0),
                     ..default()
                 },
-                Player::new(),
-                MidairTimer {
-                    time: Timer::from_seconds(0.7, TimerMode::Once),
-                    repeated: 0,
-                },
-            ))
-            .with_children(|children| {
-                //children
-                //    //.spawn(Collider::cuboid(
-                //        PLAYER_SCALE.x,
-                //        PLAYER_SCALE.y,
-                //        PLAYER_SCALE.z,
-                //    ))
-                //    .insert(Sensor);
-            });
+                ..default()
+            },
+            Player::new(),
+            MidairTimer {
+                time: Timer::from_seconds(0.7, TimerMode::Once),
+                repeated: 0,
+            },
+            PlayAnimation {
+                first: 0,
+                last: 2,
+                current: 0,
+            },
+        ))
     };
 }

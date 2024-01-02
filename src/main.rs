@@ -20,15 +20,14 @@ fn main() {
     let setup_win = window_cam::setup_window();
 
     App::new()
-        .add_plugins(DefaultPlugins.set(setup_win))
+        .add_plugins(
+            DefaultPlugins
+                .set(setup_win)
+                .set(ImagePlugin::default_nearest()),
+        )
         // startup
         .add_systems(Startup, window_cam::make_camera)
         .add_systems(Startup, setup)
-        // fixedupdate
-        //.add_systems(FixedUpdate, move_player)
-        //.add_systems(FixedUpdate, scroll_ground)
-        //.add_systems(FixedUpdate, scroll_items)
-        //.add_systems(FixedUpdate, collide)
         .add_systems(
             FixedUpdate,
             (
@@ -37,21 +36,26 @@ fn main() {
                 scroll_items,
                 collide,
                 midair_player,
+                animate_player,
             )
                 .chain(),
         )
         .run();
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    summon_player!(commands);
+fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+) {
+    summon_player!(commands, asset_server, texture_atlases);
     make_ramp!(commands);
 
     commands.spawn((
         SpriteBundle {
             transform: Transform {
                 translation: Vec3::new(0.0, 0.0, -1.0),
-                scale: Vec3::new(5.0, 5.0, 1.0),
+                scale: Vec3::new(4.5, 4.5, 1.0),
                 ..default()
             },
             texture: asset_server.load("snow.png"),

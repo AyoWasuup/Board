@@ -33,7 +33,7 @@ macro_rules! make_flooritem_base {
             SpriteBundle {
                 transform: Transform {
                     translation: Vec3::new(xpos, -400.0, 1.0),
-                    scale: Vec3::new(30.0, 30.0, 1.0),
+                    scale: Vec3::new(40.0, 30.0, 1.0),
                     ..default()
                 },
                 sprite: Sprite {
@@ -61,7 +61,7 @@ macro_rules! make_ramp {
             SpriteBundle {
                 transform: Transform {
                     translation: Vec3::new(xpos, -400.0, 1.0),
-                    scale: Vec3::new(30.0, 30.0, 1.0),
+                    scale: Vec3::new(40.0, 30.0, 1.0),
                     ..default()
                 },
                 sprite: Sprite {
