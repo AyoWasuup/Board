@@ -31,6 +31,7 @@ fn main() {
         .add_systems(
             FixedUpdate,
             (
+                spawner_spawn,
                 move_player,
                 scroll_ground,
                 scroll_items,
@@ -49,7 +50,20 @@ fn setup(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
     summon_player!(commands, asset_server, texture_atlases);
-    make_ramp!(commands);
+
+    commands.spawn((
+        SpriteBundle {
+            transform: Transform {
+                translation: Vec3::new(0.0, 0.0, 0.0),
+                scale: Vec3::new(1.0, 1.0, 1.0),
+                ..default()
+            },
+            ..default()
+        },
+        Spawner {
+            spawn_time: Timer::from_seconds(1.0, TimerMode::Repeating),
+        },
+    ));
 
     commands.spawn((
         SpriteBundle {

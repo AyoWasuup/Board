@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+use crate::make_ramp;
 use bevy::prelude::*;
 use rand::Rng;
 
@@ -6,6 +7,26 @@ const PICKUP_SIZE: Vec3 = Vec3::new(30.0, 30.0, 0.0);
 
 #[path = "global.rs"]
 mod global;
+
+#[derive(Component)]
+pub struct Spawner {
+    pub spawn_time: Timer,
+}
+
+pub fn spawner_spawn(mut query: Query<&mut Spawner>, time: Res<Time>, mut commands: Commands) {
+    for mut spawner in &mut query {
+        spawner.spawn_time.tick(time.delta());
+
+        if spawner.spawn_time.just_finished() {
+            let mut rng = rand::thread_rng();
+            let spawn_index = rng.gen_range(0..100);
+
+            if spawn_index <= 50 {
+                make_ramp!(commands);
+            }
+        }
+    }
+}
 
 #[derive(Component)]
 pub struct FloorItem {

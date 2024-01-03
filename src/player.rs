@@ -9,6 +9,13 @@ const SPEED: f32 = 25.0;
 pub const PLAYER_SCALE: Vec3 = Vec3::new(25.0, 50.0, 0.0);
 pub const PLAYER_DEFAULT_POS: Vec3 = Vec3::new(0.0, 200.0, 0.0);
 
+#[macro_export]
+macro_rules! player_jump_time {
+    () => {
+        Timer::from_seconds(0.7, TimerMode::Once)
+    };
+}
+
 #[derive(Component)]
 pub struct PlayAnimation {
     pub first: usize,
@@ -72,7 +79,7 @@ pub fn move_player(
         transform.translation.x = clamped_transform;
 
         transform.rotate_z(rotate * time.delta_seconds());
-        let clamped_rotation = transform.rotation.z.clamp(-25.5, 90.0);
+        let clamped_rotation = transform.rotation.z.clamp(-15.0, 79.5);
         transform.rotation = Quat::from_rotation_z(clamped_rotation);
     }
 }
@@ -102,7 +109,6 @@ pub fn midair_player(
 
     if player.midair {
         midair_timer.time.tick(time.delta());
-
         if midair_timer.time.finished() {
             midair_timer.repeated += 1;
 
@@ -111,6 +117,10 @@ pub fn midair_player(
                     player.gravity * (midair_timer.repeated / 5) as f32 * time.delta_seconds();
             } else {
                 player_transform.translation.y = PLAYER_DEFAULT_POS.y;
+                midair_timer.time.reset();
+                midair_timer
+                    .time
+                    .set_duration(player_jump_time!().duration());
                 player.midair = false;
             }
         } else if player_transform.translation.y == PLAYER_DEFAULT_POS.y {
@@ -141,7 +151,7 @@ macro_rules! summon_player {
             },
             Player::new(),
             MidairTimer {
-                time: Timer::from_seconds(0.7, TimerMode::Once),
+                time: player_jump_time!(),
                 repeated: 0,
             },
             PlayAnimation {
