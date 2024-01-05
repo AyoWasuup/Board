@@ -1,8 +1,10 @@
+use bevy::winit::WinitWindows;
 use bevy::{
     prelude::*,
     render::view::WindowRenderPlugin,
     window::{WindowDestroyed, WindowResized, WindowResolution},
 };
+use bevy::{prelude::*, window::PrimaryWindow};
 
 pub fn make_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
@@ -15,7 +17,7 @@ pub fn make_camera(mut commands: Commands) {
 pub fn setup_window() -> WindowPlugin {
     WindowPlugin {
         primary_window: Some(Window {
-            title: "Fullscreen Test".into(),
+            title: "Board?".into(),
             resizable: false,
             resolution: WindowResolution::new(480.0, 800.0).with_scale_factor_override(1.0),
             ..default()

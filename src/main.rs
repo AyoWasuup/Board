@@ -36,6 +36,7 @@ fn main() {
                 scroll_ground,
                 scroll_items,
                 collide,
+                update_glider_text,
                 midair_player,
                 animate_player,
             )
@@ -76,6 +77,27 @@ fn setup(
             ..default()
         },
         global::Ground::new(200.0),
+    ));
+
+    let text = "i am the textman\nmy text is delicous";
+
+    commands.spawn((
+        TextBundle::from_section(
+            text,
+            TextStyle {
+                font_size: 25.0,
+                color: Color::BLACK,
+                ..default()
+            },
+        )
+        .with_text_alignment(TextAlignment::Left)
+        .with_style(Style {
+            position_type: PositionType::Relative,
+            bottom: Val::Px(0.0),
+            right: Val::Px(0.0),
+            ..default()
+        }),
+        GliderText,
     ));
 }
 
@@ -123,15 +145,18 @@ fn collide(
 
                 match flooritem.get_type() {
                     "ramp" => {
-                        if !player.midair {
-                            player.midair = true;
+                        player.midair = true;
+                        if player.gliders > 0 && !player.has_glider {
+                            player.gliders -= 1;
+                            player.has_glider = true;
                         }
+                    }
+                    "glider" => {
+                        player.gliders += 1;
+                        commands.entity(entity).despawn();
                     }
                     _ => (),
                 }
-
-                // despawns the pickup
-                //commands.entity(entity).despawn();
             }
         }
     }

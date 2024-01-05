@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use crate::make_ramp;
+use crate::{make_glider, make_ramp};
 use bevy::prelude::*;
 use rand::Rng;
 
@@ -21,7 +21,9 @@ pub fn spawner_spawn(mut query: Query<&mut Spawner>, time: Res<Time>, mut comman
             let mut rng = rand::thread_rng();
             let spawn_index = rng.gen_range(0..100);
 
-            if spawn_index <= 50 {
+            if spawn_index <= 20 {
+                make_glider!(commands);
+            } else if spawn_index <= 60 {
                 make_ramp!(commands);
             }
         }
@@ -65,11 +67,6 @@ macro_rules! make_flooritem_base {
             },
             FloorItem::new("default"),
         ))
-        //.with_children(|children| {
-        //    children
-        //        .spawn(Collider::cuboid(30.0, 30.0, 1.0))
-        //        .insert(Sensor);
-        //});
     };
 }
 
@@ -82,7 +79,7 @@ macro_rules! make_ramp {
             SpriteBundle {
                 transform: Transform {
                     translation: Vec3::new(xpos, -400.0, 1.0),
-                    scale: Vec3::new(40.0, 30.0, 1.0),
+                    scale: Vec3::new(60.0, 20.0, 1.0),
                     ..default()
                 },
                 sprite: Sprite {
@@ -93,13 +90,28 @@ macro_rules! make_ramp {
             },
             FloorItem::new("ramp"),
         ))
-        //.with_children(|children| {
-        //    children
-        //        .spawn(Collider::cuboid(30.0, 30.0, 1.0))
-        //        .insert(Sensor)
-        //        .insert(
-        //            ActiveCollisionTypes::default() | ActiveCollisionTypes::COLLISION_EVENTS,
-        //        );
-        //});
+    };
+}
+
+#[macro_export]
+macro_rules! make_glider {
+    ($commands:ident) => {
+        let mut rng = rand::thread_rng();
+        let xpos: f32 = rng.gen_range(-200.0..200.0);
+        $commands.spawn((
+            SpriteBundle {
+                transform: Transform {
+                    translation: Vec3::new(xpos, -400.0, 1.0),
+                    scale: Vec3::new(30.0, 30.0, 1.0),
+                    ..default()
+                },
+                sprite: Sprite {
+                    color: Color::RED,
+                    ..default()
+                },
+                ..default()
+            },
+            FloorItem::new("glider"),
+        ))
     };
 }

@@ -28,6 +28,8 @@ pub struct Player {
     pub midair: bool,
     pub midair_time: (usize, usize),
     pub gravity: f32,
+    pub gliders: i32,
+    pub has_glider: bool,
 }
 
 impl Player {
@@ -36,13 +38,13 @@ impl Player {
             midair: false,
             midair_time: (0, 5),
             gravity: 15.0,
+            has_glider: false,
+            gliders: 0,
         }
     }
 
     pub fn hit_by_ramp(&mut self) {
-        if !self.midair {
-            self.midair;
-        }
+        self.midair = true;
     }
 }
 
@@ -114,13 +116,20 @@ pub fn midair_player(
 
             if player_transform.translation.y > PLAYER_DEFAULT_POS.y {
                 player_transform.translation.y -=
-                    player.gravity * (midair_timer.repeated / 5) as f32 * time.delta_seconds();
+                    player.gravity * (midair_timer.repeated / 5) as f32 / {
+                        if player.has_glider {
+                            2.0
+                        } else {
+                            1.0
+                        }
+                    } * time.delta_seconds();
             } else {
                 player_transform.translation.y = PLAYER_DEFAULT_POS.y;
                 midair_timer.time.reset();
                 midair_timer
                     .time
                     .set_duration(player_jump_time!().duration());
+                player.has_glider = false;
                 player.midair = false;
             }
         } else if player_transform.translation.y == PLAYER_DEFAULT_POS.y {
@@ -128,6 +137,19 @@ pub fn midair_player(
             player_transform.translation.z += jumptime_z;
         }
     }
+}
+
+#[derive(Component)]
+pub struct GliderText;
+
+pub fn update_glider_text(
+    mut player_query: Query<&mut Player>,
+    mut text_query: Query<&mut Text, With<GliderText>>,
+) {
+    let mut player = player_query.single_mut();
+    let mut text = text_query.single_mut();
+
+    text.sections[0].value = "gliders: ".to_string() + player.gliders.to_string().as_str();
 }
 
 #[macro_export]
