@@ -12,7 +12,7 @@ pub const PLAYER_DEFAULT_POS: Vec3 = Vec3::new(0.0, 200.0, 0.0);
 #[macro_export]
 macro_rules! player_jump_time {
     () => {
-        Timer::from_seconds(0.7, TimerMode::Once)
+        Timer::from_seconds(0.9, TimerMode::Once)
     };
 }
 
@@ -37,7 +37,7 @@ impl Player {
         Player {
             midair: false,
             midair_time: (0, 5),
-            gravity: 15.0,
+            gravity: 9.0,
             has_glider: false,
             gliders: 0,
         }
@@ -118,7 +118,7 @@ pub fn midair_player(
                 player_transform.translation.y -=
                     player.gravity * (midair_timer.repeated / 5) as f32 / {
                         if player.has_glider {
-                            2.0
+                            4.0
                         } else {
                             1.0
                         }
