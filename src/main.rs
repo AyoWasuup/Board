@@ -152,8 +152,16 @@ fn collide(
                         }
                     }
                     "glider" => {
-                        player.gliders += 1;
-                        commands.entity(entity).despawn();
+                        if !player.midair {
+                            player.gliders += 1;
+                            commands.entity(entity).despawn();
+                        }
+                    }
+                    "extra life" => {
+                        if !player.midair {
+                            player.lives += 1;
+                            commands.entity(entity).despawn();
+                        }
                     }
                     _ => (),
                 }

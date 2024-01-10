@@ -1,9 +1,10 @@
 #![allow(dead_code)]
-use crate::{make_glider, make_ramp};
+use crate::{make_glider, make_ramp, make_extra_life};
 use bevy::prelude::*;
 use rand::Rng;
 
 const PICKUP_SIZE: Vec3 = Vec3::new(30.0, 30.0, 0.0);
+
 
 #[path = "global.rs"]
 mod global;
@@ -21,10 +22,12 @@ pub fn spawner_spawn(mut query: Query<&mut Spawner>, time: Res<Time>, mut comman
             let mut rng = rand::thread_rng();
             let spawn_index = rng.gen_range(0..100);
 
-            if spawn_index <= 20 {
+            if spawn_index <= 15 {
                 make_glider!(commands);
             } else if spawn_index <= 60 {
                 make_ramp!(commands);
+            } else if spawn_index <= 65 {
+                make_extra_life!(commands);
             }
         }
     }
@@ -112,6 +115,29 @@ macro_rules! make_glider {
                 ..default()
             },
             FloorItem::new("glider"),
+        ))
+    };
+}
+
+#[macro_export]
+macro_rules! make_extra_life {
+    ($commands:ident) => {
+        let mut rng = rand::thread_rng();
+        let xpos: f32 = rng.gen_range(-200.0..200.0);
+        $commands.spawn((
+            SpriteBundle {
+                transform: Transform {
+                    translation: Vec3::new(xpos, -400.0, 1.0),
+                    scale: Vec3::new(30.0, 30.0, 1.0),
+                    ..default()
+                },
+                sprite: Sprite {
+                    color: Color::BLUE,
+                    ..default()
+                },
+                ..default()
+            },
+            FloorItem::new("extra life"),
         ))
     };
 }

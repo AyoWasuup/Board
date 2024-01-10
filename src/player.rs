@@ -29,6 +29,7 @@ pub struct Player {
     pub midair_time: (usize, usize),
     pub gravity: f32,
     pub gliders: i32,
+    pub lives: i32,
     pub has_glider: bool,
 }
 
@@ -40,6 +41,7 @@ impl Player {
             gravity: 9.0,
             has_glider: false,
             gliders: 0,
+            lives: 3,
         }
     }
 
@@ -149,7 +151,10 @@ pub fn update_glider_text(
     let mut player = player_query.single_mut();
     let mut text = text_query.single_mut();
 
-    text.sections[0].value = "gliders: ".to_string() + player.gliders.to_string().as_str();
+    text.sections[0].value = {
+        "gliders: ".to_string() + player.gliders.to_string().as_str() + "\n" +
+        "lives: " + player.lives.to_string().as_str()
+    };
 }
 
 #[macro_export]
