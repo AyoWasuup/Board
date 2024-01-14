@@ -1,10 +1,9 @@
 #![allow(dead_code)]
-use crate::{make_glider, make_ramp, make_extra_life};
+use crate::{make_glider, make_ramp, make_extra_life, make_roadblock_base};
 use bevy::prelude::*;
 use rand::Rng;
 
 const PICKUP_SIZE: Vec3 = Vec3::new(30.0, 30.0, 0.0);
-
 
 #[path = "global.rs"]
 mod global;
@@ -28,6 +27,8 @@ pub fn spawner_spawn(mut query: Query<&mut Spawner>, time: Res<Time>, mut comman
                 make_ramp!(commands);
             } else if spawn_index <= 65 {
                 make_extra_life!(commands);
+            } else if spawn_index <= 90 {
+                make_roadblock_base!(commands);
             }
         }
     }
@@ -69,6 +70,29 @@ macro_rules! make_flooritem_base {
                 ..default()
             },
             FloorItem::new("default"),
+        ))
+    };
+}
+
+#[macro_export]
+macro_rules! make_roadblock_base {
+    ($commands:ident) => {
+        let mut rng = rand::thread_rng();
+        let xpos: f32 = rng.gen_range(-200.0..200.0);
+        $commands.spawn((
+            SpriteBundle {
+                transform: Transform {
+                    translation: Vec3::new(xpos, -400.0, 1.0),
+                    scale: Vec3::new(40.0, 30.0, 1.0),
+                    ..default()
+                },
+                sprite: Sprite {
+                    color: Color::GREEN,
+                    ..default()
+                },
+                ..default()
+            },
+            FloorItem::new("roadblock"),
         ))
     };
 }
@@ -138,6 +162,29 @@ macro_rules! make_extra_life {
                 ..default()
             },
             FloorItem::new("extra life"),
+        ))
+    };
+}
+
+#[macro_export]
+macro_rules! make_energy {
+    ($commands:ident) => {
+        let mut rng = rand::thread_rng();
+        let xpos: f32 = rng.gen_range(-200.0..200.0);
+        $commands.spawn((
+            SpriteBundle {
+                transform: Transform {
+                    translation: Vec3::new(xpos, -400.0, 1.0),
+                    scale: Vec3::new(30.0, 10.0, 1.0),
+                    ..default()
+                },
+                sprite: Sprite {
+                    color: Color::GREEN,
+                    ..default()
+                },
+                ..default()
+            },
+            FloorItem::new("energy"),
         ))
     };
 }

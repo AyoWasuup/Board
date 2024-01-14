@@ -31,6 +31,7 @@ pub struct Player {
     pub gliders: i32,
     pub lives: i32,
     pub has_glider: bool,
+    pub energy: bool,
 }
 
 impl Player {
@@ -42,6 +43,7 @@ impl Player {
             has_glider: false,
             gliders: 0,
             lives: 3,
+            energy: false,
         }
     }
 

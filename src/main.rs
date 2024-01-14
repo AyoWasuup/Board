@@ -127,6 +127,7 @@ fn collide(
     mut commands: Commands,
     mut player_query: Query<(&mut Player, &Transform)>,
     mut entity_query: Query<(Entity, &Transform, Option<&FloorItem>)>,
+    mut app_exit_events: ResMut<Events<bevy::app::AppExit>>,
 ) {
     let (mut player, player_transform) = player_query.single_mut();
     let player_size = player_transform.scale.truncate();
@@ -160,6 +161,16 @@ fn collide(
                     "extra life" => {
                         if !player.midair {
                             player.lives += 1;
+                            commands.entity(entity).despawn();
+                        }
+                    }
+                    "roadblock" => {
+                        if !player.midair {
+                            player.lives -= 1;
+                            if player.lives < 0 {
+                                println!("skill issue you died");
+                                app_exit_events.send(bevy::app::AppExit);
+                            }
                             commands.entity(entity).despawn();
                         }
                     }
