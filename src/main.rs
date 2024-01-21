@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use bevy::ecs::event::event_update_condition;
 use bevy::prelude::*;
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
@@ -10,11 +11,23 @@ use player::*;
 mod floor_items;
 use floor_items::*;
 
+mod states;
+use states::*;
+
 mod window_cam;
 
 use rand::Rng;
 
-const DEFAULT_SCROLL_SPEED: f32 = 1.0;
+const DEFAULT_SCROLL_SPEED: f32 = 200.0;
+
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
+enum GameState {
+    MainMenu,
+    #[default]
+    InGame,
+    Paused,
+    GameOver,
+}
 
 fn main() {
     let setup_win = window_cam::setup_window();
@@ -25,9 +38,11 @@ fn main() {
                 .set(setup_win)
                 .set(ImagePlugin::default_nearest()),
         )
+        .add_state::<GameState>()
         // startup
         .add_systems(Startup, window_cam::make_camera)
-        .add_systems(Startup, setup)
+        // in-game systems
+        .add_systems(OnEnter(GameState::InGame), setup_game)
         .add_systems(
             FixedUpdate,
             (
@@ -40,12 +55,16 @@ fn main() {
                 midair_player,
                 animate_player,
             )
-                .chain(),
+                .chain()
+                .run_if(in_state(GameState::InGame))
         )
+        // game over systems
+        .add_systems(OnEnter(GameState::GameOver), setup_gameover)
+        .add_systems(OnExit(GameState::GameOver), end_gameover)
         .run();
 }
 
-fn setup(
+fn setup_game(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
@@ -76,7 +95,7 @@ fn setup(
             texture: asset_server.load("snow.png"),
             ..default()
         },
-        global::Ground::new(200.0),
+        global::Ground::new(DEFAULT_SCROLL_SPEED),
     ));
 
     let text = "i am the textman\nmy text is delicous";
@@ -104,7 +123,7 @@ fn setup(
 const MAX_Y_POS_GROUND: f32 = 80.0;
 
 fn scroll_ground(mut ground_query: Query<(&mut global::Ground, &mut Transform)>, time: Res<Time>) {
-    let (mut ground, mut transform) = ground_query.single_mut();
+    let (ground, mut transform) = ground_query.single_mut();
 
     if MAX_Y_POS_GROUND > transform.translation.y {
         transform.translation.y += ground.scroll_speed * time.delta_seconds();
@@ -128,6 +147,7 @@ fn collide(
     mut player_query: Query<(&mut Player, &Transform)>,
     mut entity_query: Query<(Entity, &Transform, Option<&FloorItem>)>,
     mut app_exit_events: ResMut<Events<bevy::app::AppExit>>,
+    mut next_state: ResMut<NextState<GameState>>,
 ) {
     let (mut player, player_transform) = player_query.single_mut();
     let player_size = player_transform.scale.truncate();
@@ -169,7 +189,8 @@ fn collide(
                             player.lives -= 1;
                             if player.lives < 0 {
                                 println!("skill issue you died");
-                                app_exit_events.send(bevy::app::AppExit);
+                                next_state.set(GameState::GameOver);
+                                //app_exit_events.send(bevy::app::AppExit);
                             }
                             commands.entity(entity).despawn();
                         }
