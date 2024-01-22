@@ -9,30 +9,27 @@ pub fn setup_gameover(mut commands: Commands, window: Query<&Window>){
     let win_width = window.resolution.width();
     let win_height = window.resolution.height();
 
-
     let text = "GAME\nOVER";
     commands.spawn((
         TextBundle::from_section(
-            text: Text {
-                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                    value: "Game Over".to_string(),
-                    style: TextStyle {
-                        alignment: TextAlignment {
-                            vertical: VerticalAlign::Center,
-                            horizontal: HorizontalAlign::Center,
-                        },
-                        color: Color::ORANGE,
-                        font_size: 150.0,
-                    },
-                },
-
-            .with_text_alignment(TextAlignment::Center)
-            .with_style(Style {
-                align_self: AlignSelf::Center,
+            text,
+            TextStyle {
+                color: Color::RED,
+                font_size: 150.0,
                 ..default()
-            }),
-            GameOverText,
-        ));
+            },
+        )
+
+        .with_text_alignment(TextAlignment::Center)
+        .with_style(Style {
+            align_self: AlignSelf::Center,
+            left: Val::Px(90.0),
+            ..default()
+        }),
+        GameOverText,
+    ));
+
+    println!("{}, {}", win_width, win_width /2.0);
 }
 
 pub fn end_gameover(mut gameovertext: Query<Entity, With<GameOverText>>, mut commands: Commands){
