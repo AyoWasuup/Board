@@ -18,7 +18,7 @@ mod window_cam;
 
 use rand::Rng;
 
-const DEFAULT_SCROLL_SPEED: f32 = 200.0;
+const DEFAULT_SCROLL_SPEED: f32 = 400.0;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 enum GameState {

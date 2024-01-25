@@ -42,7 +42,7 @@ impl Player {
             gravity: 9.0,
             has_glider: false,
             gliders: 0,
-            lives: 3,
+            lives: 2,
             energy: false,
         }
     }
@@ -66,12 +66,12 @@ pub fn move_player(
 
         for ev in mouse_motion.read() {
             movedx = ev.delta.x;
-            rotate = ev.delta.x;
+            rotate = ev.delta.x / 2.0;
         }
 
-        if rotate > 1.0 {
+        if rotate > 0.5 {
             player_sprite.current = 1;
-        } else if rotate < -1.0 {
+        } else if rotate < -0.5 {
             player_sprite.current = 2;
         } else {
             player_sprite.current = 0;

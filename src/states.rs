@@ -32,6 +32,16 @@ pub fn setup_gameover(mut commands: Commands, window: Query<&Window>){
     println!("{}, {}", win_width, win_width /2.0);
 }
 
+// TODO:
+//pub fn setup_main_menu(mut commands: Commands, mut all_en: Query<Entity>) {
+//    for entity in &mut all_en {
+//        commands.entity(entity).despawn();
+//    }
+//
+//    let text = "board?";
+//    commands.spawn()
+//}
+
 pub fn end_gameover(mut gameovertext: Query<Entity, With<GameOverText>>, mut commands: Commands){
     for i in &mut gameovertext {
         commands.entity(i).despawn();
