@@ -115,8 +115,6 @@ pub fn animate_player(
             midair_timer.on_ground_for.reset();
             midair_timer.on_ground_for.pause();
         }
-
-        println!("{}", midair_timer.on_ground_for.elapsed().as_secs_f32());
     }
 }
 

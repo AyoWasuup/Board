@@ -25,9 +25,9 @@ pub fn spawner_spawn(mut query: Query<&mut Spawner>, time: Res<Time>, mut comman
                 make_glider!(commands);
             } else if spawn_index <= 60 {
                 make_ramp!(commands);
-            } else if spawn_index <= 65 {
+            } else if spawn_index <= 61 {
                 make_extra_life!(commands);
-            } else if spawn_index <= 90 {
+            } else if spawn_index <= 80 {
                 make_roadblock_base!(commands);
             }
         }
@@ -83,7 +83,7 @@ macro_rules! make_roadblock_base {
             SpriteBundle {
                 transform: Transform {
                     translation: Vec3::new(xpos, -400.0, 1.0),
-                    scale: Vec3::new(40.0, 30.0, 1.0),
+                    scale: Vec3::new(60.0, 75.0, 1.0),
                     ..default()
                 },
                 sprite: Sprite {
