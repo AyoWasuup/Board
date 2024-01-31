@@ -1,4 +1,4 @@
-use bevy::{input::mouse::MouseMotion, prelude::*, render::render_resource::PipelineLayout};
+use bevy::{input::mouse::MouseMotion, prelude::*, render::render_resource::PipelineLayout, time::Stopwatch, ecs::change_detection::MutUntyped};
 use std::time::Duration;
 #[path = "global.rs"]
 mod global;
@@ -91,16 +91,39 @@ pub fn move_player(
 }
 
 pub fn animate_player(
-    mut query: Query<(&mut PlayAnimation, &mut TextureAtlasSprite), With<Player>>,
+    mut query: Query<(&PlayAnimation, &mut TextureAtlasSprite, &mut MidairTimer), With<Player>>,
+    mut qplayer: Query<&mut Player>,
+    time: Res<Time>,
 ) {
-    for (mut player, mut player_sprite) in &mut query {
-        player_sprite.index = player.current;
+    let mut player = qplayer.single_mut();
+
+    for (player_anim, mut player_sprite, mut midair_timer) in &mut query {
+        if !player.midair {
+            midair_timer.on_ground_for.unpause();
+            midair_timer.on_ground_for.tick(time.delta());
+
+            if midair_timer.on_ground_for.elapsed() < Duration::from_secs_f32(0.06) 
+                && midair_timer.on_ground_for.elapsed() > Duration::from_secs_f32(0.02) {
+                player_sprite.index = 4;
+            }
+            else {
+                player_sprite.index = player_anim.current;
+            }
+        }
+        else {
+            player_sprite.index = 3;
+            midair_timer.on_ground_for.reset();
+            midair_timer.on_ground_for.pause();
+        }
+
+        println!("{}", midair_timer.on_ground_for.elapsed().as_secs_f32());
     }
 }
 
 #[derive(Component)]
 pub struct MidairTimer {
     pub time: Timer,
+    pub on_ground_for: Stopwatch,
     pub repeated: i32,
 }
 
@@ -181,6 +204,7 @@ macro_rules! summon_player {
             Player::new(),
             MidairTimer {
                 time: player_jump_time!(),
+                on_ground_for: Stopwatch::new(),
                 repeated: 0,
             },
             PlayAnimation {
