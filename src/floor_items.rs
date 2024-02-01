@@ -21,13 +21,13 @@ pub fn spawner_spawn(mut query: Query<&mut Spawner>, time: Res<Time>, mut comman
             let mut rng = rand::thread_rng();
             let spawn_index = rng.gen_range(0..100);
 
-            if spawn_index <= 15 {
+            if spawn_index <= 5 {
                 make_glider!(commands);
-            } else if spawn_index <= 60 {
+            } else if spawn_index <= 40 {
                 make_ramp!(commands);
-            } else if spawn_index <= 61 {
+            } else if spawn_index <= 42 {
                 make_extra_life!(commands);
-            } else if spawn_index <= 80 {
+            } else if spawn_index <= 95 {
                 make_roadblock_base!(commands);
             }
         }
