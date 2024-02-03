@@ -2,6 +2,8 @@
 use bevy::ecs::event::event_update_condition;
 use bevy::prelude::*;
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle, time::Stopwatch};
+use bevy_kira_audio::{Audio, AudioPlugin, AudioControl};
+use bevy_kira_audio::prelude::*;
 
 mod global;
 
@@ -38,6 +40,7 @@ fn main() {
                 .set(setup_win)
                 .set(ImagePlugin::default_nearest()),
         )
+        .add_plugins(AudioPlugin)
         .add_state::<GameState>()
         // startup
         .add_systems(Startup, window_cam::make_camera)
@@ -144,10 +147,12 @@ fn scroll_items(
 
 fn collide(
     mut commands: Commands,
+    mut asset_server: Res<AssetServer>,
     mut player_query: Query<(&mut Player, &Transform)>,
     mut entity_query: Query<(Entity, &Transform, Option<&FloorItem>)>,
     mut app_exit_events: ResMut<Events<bevy::app::AppExit>>,
     mut next_state: ResMut<NextState<GameState>>,
+    mut audio: Res<bevy_kira_audio::Audio>,
 ) {
     let (mut player, player_transform) = player_query.single_mut();
     let player_size = player_transform.scale.truncate();
@@ -190,7 +195,7 @@ fn collide(
                             if player.lives < 0 {
                                 println!("skill issue you died");
                                 next_state.set(GameState::GameOver);
-                                //app_exit_events.send(bevy::app::AppExit);
+                                audio.play(asset_server.load("hittable.mp3"));
                             }
                             commands.entity(entity).despawn();
                         }
