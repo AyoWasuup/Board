@@ -192,10 +192,12 @@ fn collide(
                     "roadblock" => {
                         if !player.midair {
                             player.lives -= 1;
-                            audio.play(asset_server.load("hittable.mp3"));
                             if player.lives < 0 {
-                                println!("skill issue you died");
                                 next_state.set(GameState::GameOver);
+                                audio.play(asset_server.load("deathtune.wav"));
+                            }
+                            else {
+                                audio.play(asset_server.load("hittable.mp3"));
                             }
                             commands.entity(entity).despawn();
                         }
