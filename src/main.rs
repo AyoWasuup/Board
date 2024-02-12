@@ -25,9 +25,9 @@ const DEFAULT_SCROLL_SPEED: f32 = 600.0;
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 enum GameState {
     MainMenu,
-    #[default]
     InGame,
     Paused,
+    #[default]
     GameOver,
 }
 
@@ -63,6 +63,7 @@ fn main() {
         )
         // game over systems
         .add_systems(OnEnter(GameState::GameOver), setup_gameover)
+        .add_systems(Update, (update_gameover).run_if(in_state(GameState::GameOver)))
         .add_systems(OnExit(GameState::GameOver), end_gameover)
         .run();
 }
@@ -207,4 +208,46 @@ fn collide(
             }
         }
     }
+}
+
+fn update_gameover(
+    mut gamestate: ResMut<NextState<GameState>>,
+    mut gameoverbutton: Query<
+        (
+            &Interaction,
+            &mut BorderColor,
+            Option<&GameOverButton>,
+        ),
+        (Changed<Interaction>, With<Button>, With<GameOverButton>),
+    >,
+    mut query: Query<Entity>,
+    mut gmb: Query<&GameOverButton>,
+    mut commands: Commands,
+){
+    for (interaction, mut border_color, maybe_gameover) in &mut gameoverbutton {
+        if !maybe_gameover.is_some() {
+            break;
+        }
+
+        match *interaction {
+            Interaction::Pressed => {
+                gamestate.set(GameState::InGame);
+                for i in &mut query {
+                    commands.entity(i).despawn();
+                }
+            }
+            Interaction::Hovered => {
+                border_color.0 = Color::WHITE;
+            }
+            Interaction::None => {
+                border_color.0 = Color::BLACK;
+            }
+        }
+    }
+    
+    let mut amount = 0;
+    for gameover in gmb.iter() {
+        amount += 1;
+    }
+    //println!("{}", amount);
 }

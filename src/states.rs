@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
+pub struct GameOver;
+
+#[derive(Component)]
 pub struct GameOverText;
 
 #[derive(Component)]
@@ -13,25 +16,6 @@ pub fn setup_gameover(mut commands: Commands, window: Query<&Window>){
     let win_height = window.resolution.height();
 
     let text = "GAME\nOVER";
-    commands.spawn((
-        TextBundle::from_section(
-            text,
-            TextStyle {
-                color: Color::RED,
-                font_size: 150.0,
-                ..default()
-            },
-        )
-
-        .with_text_alignment(TextAlignment::Center)
-        .with_style(Style {
-            align_self: AlignSelf::Center,
-            left: Val::Px(90.0),
-            bottom: Val::Px(60.0),
-            ..default()
-        }),
-        GameOverText,
-    ));
 
     commands.spawn((NodeBundle {
         style: Style {
@@ -43,9 +27,30 @@ pub fn setup_gameover(mut commands: Commands, window: Query<&Window>){
             ..default()
         },
         ..default()
-    },GameOverButton))
+    }, GameOver
+    ))
+    // game over text
     .with_children(|parent| {
-        parent.spawn(ButtonBundle {
+        parent.spawn((
+            TextBundle::from_section(
+                "GAME\nOVER",
+                TextStyle {
+                    color: Color::RED,
+                    font_size: 150.0,
+                    ..default()
+                }
+            )
+        .with_text_alignment(TextAlignment::Center)
+        .with_style(Style {
+            align_self: AlignSelf::Center,
+            left: Val::Px(90.0),
+            bottom: Val::Px(60.0),
+            ..default()
+        }),
+        ));})
+    // button
+    .with_children(|parent| {
+        parent.spawn((ButtonBundle {
             style: Style {
                 width: Val::Px(300.0),
                 height: Val::Px(50.0),
@@ -58,7 +63,8 @@ pub fn setup_gameover(mut commands: Commands, window: Query<&Window>){
             border_color: BorderColor(Color::BLACK),
             background_color: Color::BLACK.into(),
             ..default()
-        })
+        }, GameOverButton
+        ))
         .with_children(|parent| {
             parent.spawn(TextBundle::from_section(
                 "INSERT COIN",
