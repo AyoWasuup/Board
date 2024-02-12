@@ -1,9 +1,12 @@
 #![allow(unused_imports)]
 use bevy::ecs::event::event_update_condition;
+use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle, time::Stopwatch};
+use bevy_inspector_egui::egui::Key;
 use bevy_kira_audio::{Audio, AudioPlugin, AudioControl};
 use bevy_kira_audio::prelude::*;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 mod global;
 
@@ -22,15 +25,6 @@ use rand::Rng;
 
 const DEFAULT_SCROLL_SPEED: f32 = 600.0;
 
-#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
-enum GameState {
-    MainMenu,
-    InGame,
-    Paused,
-    #[default]
-    GameOver,
-}
-
 fn main() {
     let setup_win = window_cam::setup_window();
 
@@ -41,6 +35,7 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
         )
         .add_plugins(AudioPlugin)
+        .add_plugins(WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::D)))
         .add_state::<GameState>()
         // startup
         .add_systems(Startup, window_cam::make_camera)
@@ -62,9 +57,7 @@ fn main() {
                 .run_if(in_state(GameState::InGame))
         )
         // game over systems
-        .add_systems(OnEnter(GameState::GameOver), setup_gameover)
-        .add_systems(Update, (update_gameover).run_if(in_state(GameState::GameOver)))
-        .add_systems(OnExit(GameState::GameOver), end_gameover)
+        .add_plugins(states::GameOverPlugin)
         .run();
 }
 
@@ -87,6 +80,7 @@ fn setup_game(
         Spawner {
             spawn_time: Timer::from_seconds(1.0, TimerMode::Repeating),
         },
+        global::GameComponent,
     ));
 
     commands.spawn((
@@ -121,6 +115,7 @@ fn setup_game(
             ..default()
         }),
         GliderText,
+        global::GameComponent,
     ));
 }
 
@@ -210,44 +205,3 @@ fn collide(
     }
 }
 
-fn update_gameover(
-    mut gamestate: ResMut<NextState<GameState>>,
-    mut gameoverbutton: Query<
-        (
-            &Interaction,
-            &mut BorderColor,
-            Option<&GameOverButton>,
-        ),
-        (Changed<Interaction>, With<Button>, With<GameOverButton>),
-    >,
-    mut query: Query<Entity>,
-    mut gmb: Query<&GameOverButton>,
-    mut commands: Commands,
-){
-    for (interaction, mut border_color, maybe_gameover) in &mut gameoverbutton {
-        if !maybe_gameover.is_some() {
-            break;
-        }
-
-        match *interaction {
-            Interaction::Pressed => {
-                gamestate.set(GameState::InGame);
-                for i in &mut query {
-                    commands.entity(i).despawn();
-                }
-            }
-            Interaction::Hovered => {
-                border_color.0 = Color::WHITE;
-            }
-            Interaction::None => {
-                border_color.0 = Color::BLACK;
-            }
-        }
-    }
-    
-    let mut amount = 0;
-    for gameover in gmb.iter() {
-        amount += 1;
-    }
-    //println!("{}", amount);
-}

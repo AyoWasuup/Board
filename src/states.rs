@@ -1,4 +1,5 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, ecs::query::WorldQuery};
+use crate::{player::{Player, MidairTimer, PlayAnimation}, global::{Ground, self}, floor_items::FloorItem};
 
 #[derive(Component)]
 pub struct GameOver;
@@ -8,6 +9,15 @@ pub struct GameOverText;
 
 #[derive(Component)]
 pub struct GameOverButton;
+
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
+pub enum GameState {
+    MainMenu,
+    #[default]
+    InGame,
+    Paused,
+    GameOver,
+}
 
 pub fn setup_gameover(mut commands: Commands, window: Query<&Window>){
     let window = window.single();
@@ -58,6 +68,8 @@ pub fn setup_gameover(mut commands: Commands, window: Query<&Window>){
                 justify_content: JustifyContent::Center,
                 // vertically center child text
                 align_items: AlignItems::Center,
+                right: Val::Px(140.0),
+                bottom: Val::Px(60.0),
                 ..default()
             },
             border_color: BorderColor(Color::BLACK),
@@ -88,8 +100,54 @@ pub fn setup_gameover(mut commands: Commands, window: Query<&Window>){
 //    commands.spawn()
 //}
 
-pub fn end_gameover(mut gameovertext: Query<Entity, With<GameOverText>>, mut commands: Commands){
+pub fn end_gameover(mut gameovertext: Query<Entity, With<GameOver>>, mut commands: Commands){
     for i in &mut gameovertext {
-        commands.entity(i).despawn();
+        commands.entity(i).despawn_recursive();
     }
 }
+
+fn update_gameover(
+    mut gamestate: ResMut<NextState<GameState>>,
+    mut gameoverbutton: Query<
+        (
+            &Interaction,
+            &mut BorderColor,
+            Option<&GameOverButton>,
+        ),
+        (Changed<Interaction>, With<Button>, With<GameOverButton>),
+    >,
+    mut query: Query<Entity, With<global::GameComponent>>,
+    mut commands: Commands,
+){
+    for (interaction, mut border_color, maybe_gameover) in &mut gameoverbutton {
+        if !maybe_gameover.is_some() {
+            break;
+        }
+
+        match *interaction {
+            Interaction::Pressed => {
+                for i in &mut query {
+                    commands.entity(i).despawn_recursive();
+                }    
+                gamestate.set(GameState::InGame);
+            }
+            Interaction::Hovered => {
+                border_color.0 = Color::WHITE;
+            }
+            Interaction::None => {
+                border_color.0 = Color::BLACK;
+            }
+        }
+    }    
+}
+
+pub struct GameOverPlugin;
+
+impl Plugin for GameOverPlugin {
+    fn build(&self, app: &mut App) { 
+        app.add_systems(OnEnter(GameState::GameOver), setup_gameover)
+        .add_systems(Update, (update_gameover).run_if(in_state(GameState::GameOver)))
+        .add_systems(OnExit(GameState::GameOver), end_gameover);
+    }
+}
+

@@ -3,8 +3,6 @@ use std::time::Duration;
 #[path = "global.rs"]
 mod global;
 
-use global::*;
-
 const SPEED: f32 = 25.0;
 pub const PLAYER_SCALE: Vec3 = Vec3::new(25.0, 50.0, 0.0);
 pub const PLAYER_DEFAULT_POS: Vec3 = Vec3::new(0.0, 200.0, 0.0);
@@ -200,6 +198,7 @@ macro_rules! summon_player {
                 ..default()
             },
             Player::new(),
+            global::GameComponent,
             MidairTimer {
                 time: player_jump_time!(),
                 on_ground_for: Stopwatch::new(),

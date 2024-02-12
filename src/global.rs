@@ -9,6 +9,9 @@ pub const GROUND_WIDTH: f32 = 490.0;
 pub struct Velocity(Vec2);
 
 #[derive(Component)]
+pub struct GameComponent;
+
+#[derive(Component)]
 pub struct Ground {
     pub scroll: bool,
     pub scroll_speed: f32,

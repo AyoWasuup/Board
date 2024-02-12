@@ -70,6 +70,7 @@ macro_rules! make_flooritem_base {
                 ..default()
             },
             FloorItem::new("default"),
+            global::GameComponent,
         ))
     };
 }
@@ -93,6 +94,7 @@ macro_rules! make_roadblock_base {
                 ..default()
             },
             FloorItem::new("roadblock"),
+            global::GameComponent,
         ))
     };
 }
@@ -116,6 +118,7 @@ macro_rules! make_ramp {
                 ..default()
             },
             FloorItem::new("ramp"),
+            global::GameComponent,
         ))
     };
 }
@@ -139,6 +142,7 @@ macro_rules! make_glider {
                 ..default()
             },
             FloorItem::new("glider"),
+            global::GameComponent,
         ))
     };
 }
@@ -162,6 +166,7 @@ macro_rules! make_extra_life {
                 ..default()
             },
             FloorItem::new("extra life"),
+            global::GameComponent,
         ))
     };
 }
@@ -185,6 +190,7 @@ macro_rules! make_energy {
                 ..default()
             },
             FloorItem::new("energy"),
+            global::GameComponent,
         ))
     };
 }

@@ -25,3 +25,4 @@ pub fn setup_window() -> WindowPlugin {
         ..default()
     }
 }
+
