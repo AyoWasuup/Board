@@ -8,5 +8,5 @@ edition = "2021"
 [dependencies]
 bevy = { version = "0.12.1"}
 bevy_kira_audio = { version = "0.18.0", features = ["mp3", "wav"] }
+bevy-inspector-egui = "0.22.1"
 rand = "0.8.5"
-
