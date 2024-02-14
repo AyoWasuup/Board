@@ -5,8 +5,7 @@ use rand::Rng;
 
 const PICKUP_SIZE: Vec3 = Vec3::new(30.0, 30.0, 0.0);
 
-#[path = "global.rs"]
-mod global;
+use crate::global::global::{GameComponent, Ground};
 
 #[derive(Component)]
 pub struct Spawner {
@@ -70,7 +69,7 @@ macro_rules! make_flooritem_base {
                 ..default()
             },
             FloorItem::new("default"),
-            global::GameComponent,
+            GameComponent,
         ))
     };
 }
@@ -94,7 +93,7 @@ macro_rules! make_roadblock_base {
                 ..default()
             },
             FloorItem::new("roadblock"),
-            global::GameComponent,
+            GameComponent,
         ))
     };
 }
@@ -118,7 +117,7 @@ macro_rules! make_ramp {
                 ..default()
             },
             FloorItem::new("ramp"),
-            global::GameComponent,
+            GameComponent,
         ))
     };
 }
@@ -142,7 +141,7 @@ macro_rules! make_glider {
                 ..default()
             },
             FloorItem::new("glider"),
-            global::GameComponent,
+            GameComponent,
         ))
     };
 }
@@ -166,7 +165,7 @@ macro_rules! make_extra_life {
                 ..default()
             },
             FloorItem::new("extra life"),
-            global::GameComponent,
+            GameComponent,
         ))
     };
 }
@@ -190,7 +189,7 @@ macro_rules! make_energy {
                 ..default()
             },
             FloorItem::new("energy"),
-            global::GameComponent,
+            GameComponent,
         ))
     };
 }

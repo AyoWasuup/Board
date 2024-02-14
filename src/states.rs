@@ -1,5 +1,5 @@
 use bevy::{prelude::*, ecs::query::WorldQuery};
-use crate::{player::{Player, MidairTimer, PlayAnimation}, global::{Ground, self}, floor_items::FloorItem};
+use crate::{player::{Player, MidairTimer, PlayAnimation}, global::global::{Ground, self}, floor_items::FloorItem};
 
 #[derive(Component)]
 pub struct GameOver;
@@ -116,8 +116,6 @@ fn update_gameover(
         ),
         (Changed<Interaction>, With<Button>, With<GameOverButton>),
     >,
-    mut query: Query<Entity, With<global::GameComponent>>,
-    mut commands: Commands,
 ){
     for (interaction, mut border_color, maybe_gameover) in &mut gameoverbutton {
         if !maybe_gameover.is_some() {
@@ -126,9 +124,6 @@ fn update_gameover(
 
         match *interaction {
             Interaction::Pressed => {
-                for i in &mut query {
-                    commands.entity(i).despawn_recursive();
-                }    
                 gamestate.set(GameState::InGame);
             }
             Interaction::Hovered => {

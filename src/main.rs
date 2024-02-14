@@ -9,6 +9,7 @@ use bevy_kira_audio::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 mod global;
+use global::global::*;
 
 mod player;
 use player::*;
@@ -41,6 +42,7 @@ fn main() {
         .add_systems(Startup, window_cam::make_camera)
         // in-game systems
         .add_systems(OnEnter(GameState::InGame), setup_game)
+        .add_systems(OnExit(GameState::InGame), cleanup_game_state)
         .add_systems(
             FixedUpdate,
             (
@@ -80,7 +82,7 @@ fn setup_game(
         Spawner {
             spawn_time: Timer::from_seconds(1.0, TimerMode::Repeating),
         },
-        global::GameComponent,
+        GameComponent,
     ));
 
     commands.spawn((
@@ -93,7 +95,7 @@ fn setup_game(
             texture: asset_server.load("snow.png"),
             ..default()
         },
-        global::Ground::new(DEFAULT_SCROLL_SPEED),
+        Ground::new(DEFAULT_SCROLL_SPEED),
     ));
 
     let text = "i am the textman\nmy text is delicous";
@@ -115,13 +117,13 @@ fn setup_game(
             ..default()
         }),
         GliderText,
-        global::GameComponent,
+        GameComponent,
     ));
 }
 
 const MAX_Y_POS_GROUND: f32 = 80.0;
 
-fn scroll_ground(mut ground_query: Query<(&mut global::Ground, &mut Transform)>, time: Res<Time>) {
+fn scroll_ground(mut ground_query: Query<(&mut Ground, &mut Transform)>, time: Res<Time>) {
     let (ground, mut transform) = ground_query.single_mut();
 
     if MAX_Y_POS_GROUND > transform.translation.y {
@@ -133,7 +135,7 @@ fn scroll_ground(mut ground_query: Query<(&mut global::Ground, &mut Transform)>,
 
 fn scroll_items(
     mut scroll_query: Query<(&mut FloorItem, &mut Transform)>,
-    ground: Query<&global::Ground>,
+    ground: Query<&Ground>,
     time: Res<Time>,
 ) {
     for (mut flooritem, mut transform) in &mut scroll_query {
@@ -205,3 +207,11 @@ fn collide(
     }
 }
 
+pub fn cleanup_game_state(
+    mut query: Query<Entity, With<GameComponent>>,
+    mut commands: Commands
+){
+    for i in &mut query {
+        commands.entity(i).despawn_recursive();
+    }
+}
