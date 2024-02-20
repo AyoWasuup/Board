@@ -2,6 +2,7 @@
 use bevy::ecs::event::event_update_condition;
 use bevy::input::common_conditions::input_toggle_active;
 use bevy::prelude::*;
+use bevy::render::view::visibility;
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle, time::Stopwatch};
 use bevy_inspector_egui::egui::Key;
 use bevy_kira_audio::{Audio, AudioPlugin, AudioControl};
@@ -9,7 +10,7 @@ use bevy_kira_audio::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 mod global;
-use global::global::*;
+use global::global::{GameComponent, Ground};
 
 mod player;
 use player::*;
@@ -39,10 +40,18 @@ fn main() {
         .add_plugins(WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::D)))
         .add_state::<GameState>()
         // startup
-        .add_systems(Startup, window_cam::make_camera)
+        .add_systems(Startup, (window_cam::make_camera, setup_game).chain())
         // in-game systems
-        .add_systems(OnEnter(GameState::InGame), setup_game)
-        .add_systems(OnExit(GameState::InGame), cleanup_game_state)
+        .add_systems(
+            OnEnter(GameState::InGame), 
+            (
+                show_or_hide_game!(Visible),
+                remove_flooritems,
+                reset_player,
+            )
+
+        )
+        .add_systems(OnExit(GameState::InGame), show_or_hide_game!(Hidden))
         .add_systems(
             FixedUpdate,
             (
@@ -151,6 +160,7 @@ fn collide(
     mut app_exit_events: ResMut<Events<bevy::app::AppExit>>,
     mut next_state: ResMut<NextState<GameState>>,
     mut audio: Res<bevy_kira_audio::Audio>,
+    mut query: Query<Entity, With<GameComponent>>,
 ) {
     let (mut player, player_transform) = player_query.single_mut();
     let player_size = player_transform.scale.truncate();
@@ -191,8 +201,8 @@ fn collide(
                         if !player.midair {
                             player.lives -= 1;
                             if player.lives < 0 {
-                                next_state.set(GameState::GameOver);
                                 audio.play(asset_server.load("deathtune.wav"));
+                                next_state.set(GameState::GameOver);
                             }
                             else {
                                 audio.play(asset_server.load("hittable.mp3"));
@@ -204,14 +214,5 @@ fn collide(
                 }
             }
         }
-    }
-}
-
-pub fn cleanup_game_state(
-    mut query: Query<Entity, With<GameComponent>>,
-    mut commands: Commands
-){
-    for i in &mut query {
-        commands.entity(i).despawn_recursive();
     }
 }

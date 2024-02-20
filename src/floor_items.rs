@@ -50,6 +50,12 @@ impl FloorItem {
     }
 }
 
+pub fn remove_flooritems(mut query: Query<Entity, With<FloorItem>>, mut commands: Commands){
+    for flooritem in &mut query {
+        commands.entity(flooritem).despawn_recursive();
+    }
+}
+
 #[macro_export]
 macro_rules! make_flooritem_base {
     ($commands:ident) => {

@@ -188,6 +188,7 @@ macro_rules! summon_player {
         $commands.spawn((
             SpriteSheetBundle {
                 texture_atlas: texture_atlas_handle,
+                visibility: Visibility::Hidden,
                 sprite: TextureAtlasSprite::new(0),
                 transform: Transform {
                     translation: PLAYER_DEFAULT_POS,
@@ -210,4 +211,34 @@ macro_rules! summon_player {
             },
         ))
     };
+}
+
+// it does the job
+pub fn hide_player(
+    mut vis_query: Query<&mut Visibility, With<Player>>,
+){ 
+    for mut visible in &mut vis_query {
+        *visible = Visibility::Hidden;
+    }
+}
+
+// this also does the job
+pub fn show_player(
+    mut vis_query: Query<&mut Visibility, With<Player>>,
+){ 
+    for mut visible in &mut vis_query {
+        *visible = Visibility::Visible;
+    }    
+}
+
+pub fn reset_player(mut pos: Query<&mut Transform, With<Player>>, mut player_query: Query<&mut Player>){
+    let mut player = player_query.single_mut();
+    player.lives = 2;
+    player.gliders = 0;
+    player.midair = false;
+    player.energy = false;
+
+    for mut transform in &mut pos {
+        transform.translation = PLAYER_DEFAULT_POS;
+    }
 }
