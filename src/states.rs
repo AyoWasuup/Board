@@ -1,4 +1,5 @@
-use bevy::{prelude::*, ecs::query::WorldQuery};
+use bevy::{prelude::*, ecs::query::WorldQuery, transform::commands, audio};
+use bevy_kira_audio::AudioControl;
 use crate::{player::{Player, MidairTimer, PlayAnimation}, global::global::{Ground, self}, floor_items::FloorItem};
 
 #[derive(Component)]
@@ -9,6 +10,12 @@ pub struct GameOverText;
 
 #[derive(Component)]
 pub struct GameOverButton;
+
+#[derive(Component, PartialEq)]
+pub struct MusicPlayer {
+    pub start_music: bool,
+    pub state: i32,
+}
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum GameState {
@@ -116,7 +123,10 @@ fn update_gameover(
         ),
         (Changed<Interaction>, With<Button>, With<GameOverButton>),
     >,
+    mut music_query: Query<&mut MusicPlayer>
 ){
+    let mut music = music_query.single_mut();
+
     for (interaction, mut border_color, maybe_gameover) in &mut gameoverbutton {
         if !maybe_gameover.is_some() {
             break;
@@ -125,6 +135,8 @@ fn update_gameover(
         match *interaction {
             Interaction::Pressed => {
                 gamestate.set(GameState::InGame);
+                music.state = 1;
+                music.start_music = true;
             }
             Interaction::Hovered => {
                 border_color.0 = Color::WHITE;
@@ -146,3 +158,16 @@ impl Plugin for GameOverPlugin {
     }
 }
 
+pub fn music_player_update(
+    mut query: Query<&mut MusicPlayer>,
+    mut commands: Commands,
+    mut audio: Res<bevy_kira_audio::Audio>,
+    mut asset_server: Res<AssetServer>,
+) {
+    for mut player in &mut query {
+        if player.start_music == true && player.state == 1 {
+            audio.play(asset_server.load("theme.wav")).looped();
+            player.start_music = false;
+        }
+    }
+}

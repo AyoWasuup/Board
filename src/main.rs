@@ -39,8 +39,9 @@ fn main() {
         .add_plugins(AudioPlugin)
         .add_plugins(WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::D)))
         .add_state::<GameState>()
-        // startup
+        // always running
         .add_systems(Startup, (window_cam::make_camera, setup_game).chain())
+        .add_systems(Update, music_player_update)
         // in-game systems
         .add_systems(
             OnEnter(GameState::InGame), 
@@ -128,6 +129,13 @@ fn setup_game(
         GliderText,
         GameComponent,
     ));
+
+    commands.spawn((NodeBundle {
+        ..default()
+    }, MusicPlayer{
+        start_music: true,
+        state: 1,
+    }));
 }
 
 const MAX_Y_POS_GROUND: f32 = 80.0;
@@ -161,9 +169,11 @@ fn collide(
     mut next_state: ResMut<NextState<GameState>>,
     mut audio: Res<bevy_kira_audio::Audio>,
     mut query: Query<Entity, With<GameComponent>>,
+    mut music_query: Query<&mut MusicPlayer>
 ) {
     let (mut player, player_transform) = player_query.single_mut();
     let player_size = player_transform.scale.truncate();
+    let mut music = music_query.single_mut();
 
     for (entity, transform, maybe_flooritem) in &mut entity_query {
         let collision = bevy::sprite::collide_aabb::collide(
@@ -201,8 +211,11 @@ fn collide(
                         if !player.midair {
                             player.lives -= 1;
                             if player.lives < 0 {
+                                audio.stop();
                                 audio.play(asset_server.load("deathtune.wav"));
                                 next_state.set(GameState::GameOver);
+                                music.state = 0;
+                                music.start_music = true;
                             }
                             else {
                                 audio.play(asset_server.load("hittable.mp3"));
